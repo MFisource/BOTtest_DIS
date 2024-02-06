@@ -1,46 +1,34 @@
 <?php
 
+require __DIR__.'/vendor/autoload.php';
+require './key.php';
+
 use Discord\Discord;
 use Discord\WebSockets\Event;
-use Discord\WebSockets\Intents;
-use Discord\Voice\VoiceClient;
-use Discord\Parts\Channel\Message;
-require_once ('./vendor/autoload.php');
-require_once ('./key.php');
-require_once ('./text.php');
 
-$key = getkey();
+$token = getkey();
+$channelIdToJoin = "1200847994841473155"; // Замените YOUR_VOICE_CHANNEL_ID на реальный ID голосового канала
 
-$discord = new Discord(
-    ['token'=>$key]);
-$discord->on('ready', function (Discord $discord){
-    echo 'bot is ready';
-    $discord->on('message', function ($message, $discord){
-        $content = $message -> content;
-//        if(strpos($content,'!') === false) return;
+$discord = new Discord([
+    'token' => $token,
+]);
 
-        if(strpos($content,'!play') === 0) {
-            $channel = $message->author->getVoiceState()->channel;
+$discord->on('ready', function ($discord) use ($channelIdToJoin) {
+    echo "Bot is ready!", PHP_EOL;
 
-            if($channel) {
-                $channel->join()->then(function (VoiceClient $vc) use ($content) {
-                    $url = substr($content, 5);
+    $discord->on(Event::VOICE_STATE_UPDATE, function ($voiceState, $discord) {
+        if ($voiceState->guild_id !== null && $voiceState->user_id === $discord->user->id && $voiceState->channel_id !== null) {
+            echo "Бот успешно присоединился к голосовому каналу {$voiceState->channel_id}" . PHP_EOL;
+        }
+    });
 
-                    $audioFile = 'audio.ogg';
-
-                    exec("youtube-dl -x --audio-format vorbis --audio-quality 0 --output", $audioFile, $url);
-
-                    $vc->playFile($audioFile);
-
-                });
-            } else {
-                $message->channel->sendMessage('{$e->getMessage()}\n";');
-            }
-    };
-
-        textCommand($content,$message);
+    $discord->on(Event::MESSAGE_CREATE, function ($message, $discord) use ($channelIdToJoin) {
+        if ($message->content === '!run') {
+            $message->guild->channels->fetch('1200847994841473155')->done(function ($voicechan) use ($discord) {
+                $discord->joinVoiceChannel($voicechan, false, true, null, true);
+            });
+        }
     });
 });
-
 
 $discord->run();
