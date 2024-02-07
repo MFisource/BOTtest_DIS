@@ -7,7 +7,10 @@ use Discord\Discord;
 use Discord\WebSockets\Event;
 
 $token = getkey();
-$channelIdToJoin = "1200847994841473155"; // Замените YOUR_VOICE_CHANNEL_ID на реальный ID голосового канала
+$channelIdToJoin = "1200847994841473155";
+
+$lavalinkHost = 'lavalink';
+$lavalinkPort = 2333;
 
 $discord = new Discord([
     'token' => $token,
