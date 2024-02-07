@@ -3,3 +3,6 @@ WORKDIR /app
 COPY . .
 
 CMD [ "php", "/app/bot.php" ]
+# docker build -t name .
+# docker image
+# docker run name
